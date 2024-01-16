@@ -41,7 +41,7 @@ async def startBTN(callback: types.CallbackQuery):
         text=textsData["modes"][mode]["name"],
         callback_data=(mode + " mode"))] for mode in configData["modes"]])
 
-
+  #  Спрашиваем у пользователя, какой режим он хочет выбрать
   await callback.message.edit_text(
     text=getPhrase('choose mode'),
     reply_markup=keyboard
@@ -51,15 +51,14 @@ async def startBTN(callback: types.CallbackQuery):
 @dp.callback_query(lambda c: c.data.endswith(" mode"))
 async def modeFunctions(callback: types.CallbackQuery):
   builder = InlineKeyboardBuilder()
-  action_mode = f'{callback.data[:-5]} function'
-  button_text = getPhrase('start')
+  action_mode = f'{callback.data[:-5]} function'  # Callback-значение кнопки
+  button_text = getPhrase('start')  # Кнопка для утверждения выбора функции
 
-  print("qwerty", action_mode)
-  builder.button(text=button_text, callback_data=action_mode)
-  builder.button(text=getPhrase("back"), callback_data="start")
+  builder.button(text=button_text, callback_data=action_mode)  # Ведём к полноценной функции
+  builder.button(text=getPhrase("back"), callback_data="start")  # Кнопка "Назад"
 
   await callback.message.edit_text(
-    text=textsData["modes"][callback.data[:-5]]['discription'],
+    text=getPhrase(f"modes/{callback.data[:-5]}/discription"),
     reply_markup=builder.as_markup()
   )
 
