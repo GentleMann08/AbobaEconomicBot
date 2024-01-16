@@ -8,7 +8,13 @@ from aiogram import types
 # Функция для выдали фразы из базы с текстами
 def getPhrase(key):
   texts_data = getData('data/texts.json')
-  phrase = texts_data[key]
+  if "/" in key:
+    phrase = texts_data
+    keys = list(key.split("/"))
+    for key in keys:
+      phrase = phrase[key]
+  else:
+    phrase = texts_data[key]
   if type(phrase) == list:
     return choice(phrase)
   return phrase

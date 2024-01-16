@@ -49,14 +49,35 @@ async def startBTN(callback: types.CallbackQuery):
 
 # Если пользователь выбрал режим, то в callback в конце будет стоять " mode"
 @dp.callback_query(lambda c: c.data.endswith(" mode"))
-async def economicFacts(callback: types.CallbackQuery):
+async def modeFunctions(callback: types.CallbackQuery):
   builder = InlineKeyboardBuilder()
-  builder.button(text=getPhrase("empty button"), callback_data="empty button")
+  action_mode = "empty button"
+  button_text = getPhrase(action_mode)
+  if (callback.data[:-5] == "economic facts"):
+    button_text = textsData["start"]
+    action_mode = "economic facts function"
+  
+  builder.button(text=button_text, callback_data=action_mode)
   builder.button(text=getPhrase("back"), callback_data="start")
 
   await callback.message.edit_text(
     text=textsData["modes"][callback.data[:-5]]['discription'],
     reply_markup=builder.as_markup()
+  )
+
+@dp.callback_query(lambda c: c.data == "economic facts function")
+async def economicFacts(callback: types.CallbackQuery):
+  keyboard = InlineKeyboardMarkup(
+    inline_keyboard=[[InlineKeyboardButton(
+        text=f"{grade}-й класс",
+        callback_data=f"{grade} grade")] for grade in [9, 10, 11]])
+  keyboard.inline_keyboard.append([InlineKeyboardButton(
+        text=getPhrase("back"),
+        callback_data="start")])
+  
+  await callback.message.edit_text(
+    text=getPhrase("modes/choose grade"),
+    reply_markup=keyboard
   )
 
 @dp.callback_query(lambda c: c.data == "empty button")
