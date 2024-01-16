@@ -51,12 +51,10 @@ async def startBTN(callback: types.CallbackQuery):
 @dp.callback_query(lambda c: c.data.endswith(" mode"))
 async def modeFunctions(callback: types.CallbackQuery):
   builder = InlineKeyboardBuilder()
-  action_mode = "empty button"
-  button_text = getPhrase(action_mode)
-  if (callback.data[:-5] == "economic facts"):
-    button_text = textsData["start"]
-    action_mode = "economic facts function"
-  
+  action_mode = f'{callback.data[:-5]} function'
+  button_text = getPhrase('start')
+
+  print("qwerty", action_mode)
   builder.button(text=button_text, callback_data=action_mode)
   builder.button(text=getPhrase("back"), callback_data="start")
 
@@ -65,12 +63,13 @@ async def modeFunctions(callback: types.CallbackQuery):
     reply_markup=builder.as_markup()
   )
 
-@dp.callback_query(lambda c: c.data == "economic facts function")
+@dp.callback_query(lambda c: c.data.endswith(" function"))
 async def economicFacts(callback: types.CallbackQuery):
   keyboard = InlineKeyboardMarkup(
     inline_keyboard=[[InlineKeyboardButton(
         text=f"{grade}-й класс",
-        callback_data=f"{grade} grade")] for grade in [9, 10, 11]])
+        callback_data=f"{callback.data[:-9]} {grade} grade")] for grade in [9, 10, 11]])
+  
   keyboard.inline_keyboard.append([InlineKeyboardButton(
         text=getPhrase("back"),
         callback_data="start")])
@@ -97,7 +96,7 @@ async def helpBTN(callback: types.CallbackQuery):
 
 @dp.message()  # В случае сообщений не попадающих под фильтры
 async def textMessage(message: types.Message):
-  print(message.chat.id)
+  await message.reply(getPhrase("unexpected message"))
 
 async def main():
   await dp.start_polling(bot)  # Запуск сервера бота
