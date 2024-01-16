@@ -1,8 +1,13 @@
-run = "cowsay Configure me!"
+run = "python main.py"
 modules = ["python-3.10:v25-20230920-d4ad2e4"]
+entrypoint = "main.py"
+hidden = [".pythonlibs"]
 
 [nix]
 channel = "stable-23_11"
 
 [deployment]
 run = ["sh", "-c", "cowsay Configure me!"]
+
+[unitTest]
+language = "python3"
