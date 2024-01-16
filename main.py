@@ -4,7 +4,7 @@ from aiogram import Bot, Dispatcher, types  # Базовые объекты дл
 from aiogram.filters import Command  # Фильтры для принятия входных сообщения
 from aiogram.utils.keyboard import InlineKeyboardBuilder  # Импорт кнопок
 import logging  # Получение информации о процессе работы бота
-from auxiliary_modules import getPhrase  # Моя библиотека для выбора рандомной фразы из базы
+from auxiliary_modules import getPhrase, isUserInBase  # Моя библиотека для выбора рандомной фразы из базы
 from custom_json import getData, addData, delData  # Моя библиотека для лёгкой работы с JSON-файлами
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
@@ -19,6 +19,18 @@ bot = Bot(token = configData["token"])  # Выдача телеграм-логи
 
 @dp.message(Command("start"))  # Обработчик команды /start
 async def startCMD(message: types.Message):
+  user = message.from_user  # Получение информации о пользователе
+  if not isUserInBase(user.id):  # Проверка на наличие пользователя в базе
+    addData(
+      'data/users.json',
+      user.id,
+      {
+        "username": user.username, 
+        "first name": user.first_name, 
+        "last name": user.last_name
+      }
+    )  # Добавление пользователя в базу
+  
   # Делаем две кнопки
   builder = InlineKeyboardBuilder()  # Создаём клавиатуру типа InlineKeyboardBuilder
   builder.button(text="Начать", callback_data="start")

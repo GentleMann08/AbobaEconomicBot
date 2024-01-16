@@ -21,13 +21,12 @@ def getPhrase(key):
 
 
 
-def findUserById(user_id):
-  with open('data/users.json', 'r', encoding='utf-8') as json_file:
-    user_list = json.load(json_file)
-  for user in user_list:
-    if user['user_id'] == user_id:
-      return user
-  return None
+def isUserInBase(user_id):
+  userData = getData("data/users.json")
+  if str(user_id) in userData:
+    return True
+  else:
+    return False
 
 
 def isAdmin(user_id):
