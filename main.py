@@ -8,6 +8,8 @@ from auxiliary_modules import getPhrase, isUserInBase  # Моя библиоте
 from custom_json import getData, addData, delData  # Моя библиотека для лёгкой работы с JSON-файлами
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
+from aiogram.types import FSInputFile
+import sys
 
 logging.basicConfig(level=logging.INFO)  # Установка уровня логирования
 dp = Dispatcher()  # Создание диспетчера
@@ -105,6 +107,13 @@ async def helpBTN(callback: types.CallbackQuery):
     reply_markup=builder.as_markup()
   )
 
+@dp.message(Command("users"))
+async def sendUsersList(message: types.Message):
+  # if message.from_user.id in configData["admins"]:
+  await message.answer_document(FSInputFile(path='data/users.json'))
+  # else:
+  #   await message.answer(getPhrase("no permission"))
+
 @dp.message()  # В случае сообщений не попадающих под фильтры
 async def textMessage(message: types.Message):
   await message.reply(getPhrase("unexpected message"))
@@ -113,4 +122,5 @@ async def main():
   await dp.start_polling(bot)  # Запуск сервера бота
 
 if __name__ == "__main__":
+  # sys.stdout = open('data/output.txt', 'w')
   asyncio.run(main())  # Запуск асинхронной функции main()
