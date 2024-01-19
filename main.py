@@ -115,21 +115,34 @@ async def economicVariables(callback: types.CallbackQuery):
       callback_data="start"
   )
   
-  keyboard = InlineKeyboardMarkup(
-      inline_keyboard=[ 
-          [InlineKeyboardButton(
-              text=content[variable]["name"],
-              callback_data=content[variable]["name"]
-          ) for variable in content],
-          [back_button]
-      ]
-  )
-
+  keys = [
+    [InlineKeyboardButton(
+      text=content[variable]["name"],
+      callback_data=variable + " variable"
+    )] for variable in content
+  ]
+  
+  keys.append([back_button])
+  keyboard = InlineKeyboardMarkup(inline_keyboard=keys)
+  
   await callback.message.edit_text(
     text=getPhrase('modes/economic theory/variables/choose variable'),
     reply_markup=keyboard
   )
 
+@dp.callback_query(lambda c: c.data.endswith(" variable"))
+async def economicVariable(callback: types.CallbackQuery):
+  localContent = content = textsData["modes"]["economic theory"]["variables"]["content"][callback.data[:-9]]
+  builder = InlineKeyboardBuilder()
+  builder.button(
+    text=getPhrase("back"),
+    callback_data="variables"
+  )
+
+  await callback.message.edit_text(
+    text=localContent['name'] + "\n" + localContent['disrption'],
+    reply_markup=builder.as_markup()
+  )
 
 @dp.callback_query(lambda c: c.data == "empty button")
 async def emptyBTN(callback: types.CallbackQuery):
