@@ -4,7 +4,7 @@ from aiogram import Bot, Dispatcher, types  # Базовые объекты дл
 from aiogram.filters import Command  # Фильтры для принятия входных сообщения
 from aiogram.utils.keyboard import InlineKeyboardBuilder  # Импорт кнопок
 import logging  # Получение информации о процессе работы бота
-from auxiliary_modules import getPhrase, isUserInBase  # Моя библиотека для выбора рандомной фразы из базы
+from auxiliary_modules import getPhrase, isUserInBase, isAdmin  # Моя библиотека для выбора рандомной фразы из базы
 from custom_json import getData, addData, delData  # Моя библиотека для лёгкой работы с JSON-файлами
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
@@ -76,21 +76,60 @@ async def modeFunctions(callback: types.CallbackQuery):
     reply_markup=builder.as_markup()
   )
 
-@dp.callback_query(lambda c: c.data.endswith(" function"))
+@dp.callback_query(lambda c: c.data == "economic theory function")
 async def economicFacts(callback: types.CallbackQuery):
   keyboard = InlineKeyboardMarkup(
-    inline_keyboard=[[InlineKeyboardButton(
-        text=f"{grade}-й класс",
-        callback_data=f"{callback.data[:-9]} {grade} grade")] for grade in [9, 10, 11]])
-  
-  keyboard.inline_keyboard.append([InlineKeyboardButton(
-        text=getPhrase("back"),
-        callback_data="start")])
-  
+    inline_keyboard=[
+      [
+        InlineKeyboardButton(
+          text=getPhrase("modes/economic theory/variables/name"),
+          callback_data="variables"
+        )
+      ],
+      [
+        InlineKeyboardButton(
+          text=getPhrase("modes/economic theory/facts/name"),
+          callback_data="facts"
+        )
+      ],
+      [
+        InlineKeyboardButton(
+          text=getPhrase("back"),
+          callback_data="start"
+        )
+      ]
+    ])
+
   await callback.message.edit_text(
-    text=getPhrase("modes/choose grade"),
+    text=getPhrase('modes/economic theory/choose mode'),
     reply_markup=keyboard
   )
+
+
+@dp.callback_query(lambda c: c.data == "variables")
+async def economicVariables(callback: types.CallbackQuery):
+  content = textsData["modes"]["economic theory"]["variables"]["content"]
+
+  back_button = InlineKeyboardButton(
+      text="Назад",
+      callback_data="start"
+  )
+  
+  keyboard = InlineKeyboardMarkup(
+      inline_keyboard=[ 
+          [InlineKeyboardButton(
+              text=content[variable]["name"],
+              callback_data=content[variable]["name"]
+          ) for variable in content],
+          [back_button]
+      ]
+  )
+
+  await callback.message.edit_text(
+    text=getPhrase('modes/economic theory/variables/choose variable'),
+    reply_markup=keyboard
+  )
+
 
 @dp.callback_query(lambda c: c.data == "empty button")
 async def emptyBTN(callback: types.CallbackQuery):
@@ -109,10 +148,10 @@ async def helpBTN(callback: types.CallbackQuery):
 
 @dp.message(Command("users"))
 async def sendUsersList(message: types.Message):
-  # if message.from_user.id in configData["admins"]:
-  await message.answer_document(FSInputFile(path='data/users.json'))
-  # else:
-  #   await message.answer(getPhrase("no permission"))
+  if isAdmin(message.from_user.id):
+    await message.answer_document(FSInputFile(path='data/users.json'))
+  else:
+    await message.answer(getPhrase("no permission"))
 
 @dp.message()  # В случае сообщений не попадающих под фильтры
 async def textMessage(message: types.Message):

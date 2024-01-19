@@ -20,7 +20,6 @@ def getPhrase(key):
   return phrase
 
 
-
 def isUserInBase(user_id):
   userData = getData("data/users.json")
   if str(user_id) in userData:
@@ -30,12 +29,10 @@ def isUserInBase(user_id):
 
 
 def isAdmin(user_id):
-  config = getData('data/config.json')
-  admins = config['admins']  
-  if user_id in admins:
+  config = getData('data/config.json') 
+  if str(user_id) in config["admins"]:
     return True
-  else:
-    return False
+  return False
 
 
 def generateResponse(prompt):
