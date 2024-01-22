@@ -9,6 +9,7 @@ from custom_json import getData, addData, delData  # Моя библиотека
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 from aiogram.types import FSInputFile
+from aiogram import F
 import sys
 
 logging.basicConfig(level=logging.INFO)  # Установка уровня логирования
@@ -140,7 +141,7 @@ async def economicVariable(callback: types.CallbackQuery):
   )
 
   await callback.message.edit_text(
-    text=localContent['name'] + "\n" + localContent['disrption'],
+    text="Переменная: " + localContent['name'] + "\n\nФормулы:\n" + localContent['disrption'],
     reply_markup=builder.as_markup()
   )
 
