@@ -73,43 +73,14 @@ async def modeFunctions(callback: types.CallbackQuery):
   builder.button(text=getPhrase("back"), callback_data="start")  # Кнопка "Назад"
 
   await callback.message.edit_text(
-    text=getPhrase(f"modes/{callback.data[:-5]}/discription"),
+    text=getPhrase(f"modes/{callback.data[:-5]}/description"),
     reply_markup=builder.as_markup()
   )
 
-@dp.callback_query(lambda c: c.data == "economic theory function")
-async def economicFacts(callback: types.CallbackQuery):
-  keyboard = InlineKeyboardMarkup(
-    inline_keyboard=[
-      [
-        InlineKeyboardButton(
-          text=getPhrase("modes/economic theory/variables/name"),
-          callback_data="variables"
-        )
-      ],
-      [
-        InlineKeyboardButton(
-          text=getPhrase("modes/economic theory/facts/name"),
-          callback_data="facts"
-        )
-      ],
-      [
-        InlineKeyboardButton(
-          text=getPhrase("back"),
-          callback_data="start"
-        )
-      ]
-    ])
-
-  await callback.message.edit_text(
-    text=getPhrase('modes/economic theory/choose mode'),
-    reply_markup=keyboard
-  )
-
-
-@dp.callback_query(lambda c: c.data == "variables")
-async def economicVariables(callback: types.CallbackQuery):
-  content = textsData["modes"]["economic theory"]["variables"]["content"]
+@dp.callback_query(lambda c: c.data.endswith(" function"))
+async def functionFunctions(callback: types.CallbackQuery):
+  function = callback.data[:-9]  # Callback-значение кнопки
+  content = textsData["modes"][function]["topics"]
 
   back_button = InlineKeyboardButton(
       text="Назад",
@@ -118,37 +89,56 @@ async def economicVariables(callback: types.CallbackQuery):
   
   keys = [
     [InlineKeyboardButton(
-      text=content[variable]["name"],
-      callback_data=variable + " variable"
-    )] for variable in content
+      text=content[topic]["name"],
+      callback_data=topic + " topic"
+    )] for topic in content
   ]
-  
+
   keys.append([back_button])
   keyboard = InlineKeyboardMarkup(inline_keyboard=keys)
-  
+
   await callback.message.edit_text(
-    text=getPhrase('modes/economic theory/variables/choose variable'),
+    text=getPhrase(f"modes/{function}/choose topic"),
     reply_markup=keyboard
   )
 
-@dp.callback_query(lambda c: c.data.endswith(" variable"))
-async def economicVariable(callback: types.CallbackQuery):
-  localContent = content = textsData["modes"]["economic theory"]["variables"]["content"][callback.data[:-9]]
-  builder = InlineKeyboardBuilder()
-  builder.button(
-    text=getPhrase("back"),
-    callback_data="variables"
+@dp.callback_query(lambda c: c.data.endswith(" topic"))
+async def topicFunctions(callback: types.CallbackQuery):
+  topic = callback.data[:-6]  # Callback-значение кнопки
+  content = textsData["modes"]["theory"]["topics"][topic]
+
+  back_button = InlineKeyboardButton(
+    text="Назад",
+    callback_data="theory function"
   )
+
+  keys = [
+    [InlineKeyboardButton(
+      text=content["subtopics"][subtopic]["name"],
+      callback_data=topic + "/" + subtopic + " subtopic"
+    )] for subtopic in content["subtopics"]
+  ]
+
+  keys.append([back_button])
+  keyboard = InlineKeyboardMarkup(inline_keyboard=keys)
 
   await callback.message.edit_text(
-    text="Переменная: " + localContent['name'] + "\n\nФормулы:\n" + localContent['disrption'],
-    reply_markup=builder.as_markup()
+    text=getPhrase(f"modes/theory/topics/{topic}/description"),
+    reply_markup=keyboard
   )
 
-@dp.callback_query(lambda c: c.data == "empty button")
-async def emptyBTN(callback: types.CallbackQuery):
-  # Выводим уведомление сверху при нажатии на пустую кнопку
-  await callback.answer(getPhrase("empty button pressed"), show_alert=False)
+@dp.callback_query(lambda c: c.data.endswith(" subtopic"))
+async def subtopicFunctions(callback: types.CallbackQuery):
+  topic, subtopic = (callback.data[:-9]).split("/")  # Callback-значение кнопки
+  content = textsData["modes"]["theory"]["topics"][topic]["subtopics"][subtopic]
+
+  builder = InlineKeyboardBuilder()
+  builder.button(text="Назад", callback_data=topic + " topic")
+
+  await callback.message.edit_text(
+    text=content['description'],
+    reply_markup=builder.as_markup()
+  )
 
 @dp.callback_query(lambda c: c.data == "help") # Обработчик кнопки "Помощь"
 async def helpBTN(callback: types.CallbackQuery):
@@ -166,6 +156,11 @@ async def sendUsersList(message: types.Message):
     await message.answer_document(FSInputFile(path='data/users.json'))
   else:
     await message.answer(getPhrase("no permission"))
+
+@dp.callback_query(lambda c: c.data)
+async def emptyBTN(callback: types.CallbackQuery):
+  # Выводим уведомление сверху при нажатии на пустую кнопку
+  await callback.answer(getPhrase("empty button pressed"), show_alert=False)
 
 @dp.message()  # В случае сообщений не попадающих под фильтры
 async def textMessage(message: types.Message):
