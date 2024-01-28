@@ -82,11 +82,13 @@ async def functionFunctions(callback: types.CallbackQuery):
   function = callback.data[:-9]  # Callback-значение кнопки
   content = textsData["modes"][function]["topics"]
 
+  # Создание кнопки возврата
   back_button = InlineKeyboardButton(
       text="Назад",
       callback_data="start"
   )
   
+  # Создание списка кнопок
   keys = [
     [InlineKeyboardButton(
       text=content[topic]["name"],
@@ -94,7 +96,9 @@ async def functionFunctions(callback: types.CallbackQuery):
     )] for topic in content
   ]
 
+  # Добавление кнопки возврата
   keys.append([back_button])
+  # Создание группы кнопок
   keyboard = InlineKeyboardMarkup(inline_keyboard=keys)
 
   await callback.message.edit_text(
@@ -107,11 +111,13 @@ async def topicFunctions(callback: types.CallbackQuery):
   topic = callback.data[:-6]  # Callback-значение кнопки
   content = textsData["modes"]["theory"]["topics"][topic]
 
+  # Инициируем кнопку "Назад"
   back_button = InlineKeyboardButton(
     text="Назад",
     callback_data="theory function"
   )
 
+  # Делаем список кнопок, чтобы они правильно выводились
   keys = [
     [InlineKeyboardButton(
       text=content["subtopics"][subtopic]["name"],
@@ -119,7 +125,9 @@ async def topicFunctions(callback: types.CallbackQuery):
     )] for subtopic in content["subtopics"]
   ]
 
+  # Добавляем кнопку назад в группу
   keys.append([back_button])
+  # Преобразуем список в группу кнопок
   keyboard = InlineKeyboardMarkup(inline_keyboard=keys)
 
   await callback.message.edit_text(
@@ -132,9 +140,11 @@ async def subtopicFunctions(callback: types.CallbackQuery):
   topic, subtopic = (callback.data[:-9]).split("/")  # Callback-значение кнопки
   content = textsData["modes"]["theory"]["topics"][topic]["subtopics"][subtopic]
 
+  # Добавляем кнопку назад
   builder = InlineKeyboardBuilder()
   builder.button(text="Назад", callback_data=topic + " topic")
 
+  # Отправляем описание подтемы с возможностью выбрать другую тему
   await callback.message.edit_text(
     text=content['description'],
     reply_markup=builder.as_markup()
@@ -145,6 +155,7 @@ async def helpBTN(callback: types.CallbackQuery):
   builder = InlineKeyboardBuilder()
   builder.button(text="Начать", callback_data="start")
 
+  # Выводим основную справку по боту
   await callback.message.edit_text(
     text=getPhrase('general help'),
     reply_markup=builder.as_markup()
@@ -152,9 +163,12 @@ async def helpBTN(callback: types.CallbackQuery):
 
 @dp.message(Command("users"))
 async def sendUsersList(message: types.Message):
+  # Проверяем находится ли пользователь в списке администраторов
   if isAdmin(message.from_user.id):
+    # Отправляем документ со списком пользователей
     await message.answer_document(FSInputFile(path='data/users.json'))
   else:
+    # Отвечаем отказом
     await message.answer(getPhrase("no permission"))
 
 @dp.callback_query(lambda c: c.data)
@@ -164,6 +178,7 @@ async def emptyBTN(callback: types.CallbackQuery):
 
 @dp.message()  # В случае сообщений не попадающих под фильтры
 async def textMessage(message: types.Message):
+  # Отвечаем, что сообщение не предвидено
   await message.reply(getPhrase("unexpected message"))
 
 async def main():
